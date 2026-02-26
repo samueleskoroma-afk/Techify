@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout — Techify</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap');
+    :root{--bg:#080c10;--bg-card:#0f1620;--bg-card2:#141c28;--border:rgba(255,255,255,0.08);--border-glow:rgba(0,210,255,0.3);--accent:#00d2ff;--orange:#ff8c00;--green:#00e676;--text:#e8edf5;--text-muted:#7a8aa0;--text-dim:#4a5568;--font-display:'Syne',system-ui,sans-serif;--font-mono:'Space Mono',monospace;--radius:12px;--radius-lg:20px;--transition:0.25s cubic-bezier(0.4,0,0.2,1)}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--font-display);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh}
+    a{color:inherit;text-decoration:none}
+    button{cursor:pointer;border:none;background:none;font-family:inherit}
+    .container{max-width:1100px;margin:0 auto;padding:0 1.25rem}
+    ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--accent);border-radius:3px}
+    .nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(8,12,16,0.9);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+    .nav-inner{max-width:1200px;margin:0 auto;padding:0 1.25rem;height:64px;display:flex;align-items:center;justify-content:space-between}
+    .logo{display:flex;align-items:center;gap:.5rem;font-weight:800;font-size:1.3rem}
+    .logo-icon{font-size:1.5rem;filter:drop-shadow(0 0 8px var(--accent))}
+    .hero-bg{position:fixed;inset:0;z-index:-1;overflow:hidden}
+    .grid-overlay{position:absolute;inset:0;background-image:linear-gradient(rgba(0,210,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,210,255,0.03) 1px,transparent 1px);background-size:60px 60px}
+    .glow{position:absolute;border-radius:50%;filter:blur(80px);opacity:.15}
+    .glow-1{width:400px;height:400px;background:radial-gradient(circle,#00d2ff,transparent);top:-100px;left:-100px}
+    .checkout-wrap{padding:5.5rem 0 3rem}
+    .checkout-title{font-size:1.8rem;font-weight:800;margin-bottom:.5rem}
+    .checkout-sub{color:var(--text-muted);margin-bottom:2.5rem}
+    .checkout-grid{display:grid;grid-template-columns:1fr 360px;gap:2rem;align-items:start}
+    .card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem}
+    .card-title{font-size:1rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.5rem}
+    .step-dot{width:24px;height:24px;background:var(--accent);color:#000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0}
+    .form-group{margin-bottom:1.25rem}
+    .form-label{display:block;font-size:.85rem;font-weight:700;margin-bottom:.5rem;color:var(--text-muted)}
+    .form-input,.form-select{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius);padding:.85rem 1rem;color:var(--text);font-family:var(--font-display);font-size:.95rem;transition:border-color var(--transition)}
+    .form-input:focus,.form-select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,210,255,0.1)}
+    .form-input::placeholder{color:var(--text-dim)}
+    .form-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%237a8aa0'%3E%3Cpath d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .75rem center;background-size:20px;padding-right:2.5rem}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.85rem 1.75rem;border-radius:50px;font-family:var(--font-display);font-weight:700;font-size:.95rem;transition:all var(--transition);cursor:pointer;border:2px solid transparent;width:100%}
+    .btn-primary{background:var(--accent);color:#000;box-shadow:0 0 20px rgba(0,210,255,0.3)}
+    .btn-primary:hover{background:#00e5ff;transform:translateY(-1px)}
+    .btn-orange{background:var(--orange);color:#fff}
+    .btn-orange:hover{background:#ff9f00;transform:translateY(-1px)}
+    .btn-outline{background:transparent;color:var(--accent);border-color:var(--accent)}
+    .btn-outline:hover{background:rgba(0,210,255,0.1)}
+    .summary-product{display:flex;gap:1rem;margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}
+    .summary-img{width:70px;height:70px;background:var(--bg-card2);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:2rem;flex-shrink:0}
+    .summary-name{font-weight:700;margin-bottom:.25rem;font-size:.95rem}
+    .summary-price{font-size:1.1rem;font-weight:800;color:var(--accent);font-family:var(--font-mono)}
+    .summary-row{display:flex;justify-content:space-between;font-size:.9rem;margin-bottom:.75rem;color:var(--text-muted)}
+    .summary-total-row{display:flex;justify-content:space-between;align-items:center;padding-top:.75rem;border-top:1px solid var(--border)}
+    .total-label{font-weight:700}
+    .total-amount{font-size:1.4rem;font-weight:800;color:var(--accent);font-family:var(--font-mono)}
+    .discount-row{display:flex;gap:.5rem}
+    .discount-row .form-input{border-radius:var(--radius) 0 0 var(--radius)}
+    .discount-btn{padding:.85rem 1.25rem;background:var(--bg-card2);border:1.5px solid var(--border);border-left:none;border-radius:0 var(--radius) var(--radius) 0;color:var(--text-muted);font-family:var(--font-display);font-weight:700;font-size:.85rem;cursor:pointer;transition:all var(--transition);white-space:nowrap}
+    .discount-btn:hover{color:var(--accent)}
+    .payment-methods-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.5rem}
+    .pay-option{border:2px solid var(--border);border-radius:var(--radius);padding:1rem;text-align:center;cursor:pointer;transition:all var(--transition)}
+    .pay-option:hover,.pay-option.selected{border-color:var(--accent);background:rgba(0,210,255,0.05)}
+    .pay-option-icon{font-size:1.5rem;margin-bottom:.25rem}
+    .pay-option-name{font-size:.8rem;font-weight:700}
+    .pay-option:nth-child(1).selected{border-color:var(--orange);background:rgba(255,140,0,0.05)}
+    .pay-option:nth-child(2).selected{border-color:var(--green);background:rgba(0,230,118,0.05)}
+    .instructions-box{border-radius:var(--radius);padding:1.25rem;margin:1.25rem 0;display:none}
+    .instructions-box.show{display:block}
+    .instructions-orange{background:rgba(255,140,0,0.08);border:1px solid rgba(255,140,0,0.3)}
+    .instructions-green{background:rgba(0,230,118,0.06);border:1px solid rgba(0,230,118,0.25)}
+    .instructions-blue{background:rgba(0,210,255,0.05);border:1px solid rgba(0,210,255,0.2)}
+    .instructions-box h4{font-size:.9rem;font-weight:700;margin-bottom:.75rem}
+    .instructions-box p{font-size:.88rem;color:var(--text-muted);margin-bottom:.5rem;line-height:1.7}
+    .instructions-box strong{color:var(--text)}
+    .instructions-box .code{font-family:var(--font-mono);font-size:1rem;color:var(--accent);display:block;margin:.25rem 0}
+    .section-divider{margin:1.5rem 0;border:none;border-top:1px solid var(--border)}
+    .spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(0,0,0,0.3);border-top-color:#000;border-radius:50%;animation:spin .8s linear infinite;margin-right:.5rem}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .success-state{text-align:center;padding:2rem}
+    .success-icon{font-size:4rem;margin-bottom:1rem;animation:bounce 1s ease infinite alternate}
+    @keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-8px)}}
+    .success-state h2{font-size:1.6rem;font-weight:800;margin-bottom:.5rem}
+    .success-state p{color:var(--text-muted);margin-bottom:1.5rem}
+    .download-btn{background:var(--green);color:#000;border-radius:50px;padding:1rem 2rem;font-weight:800;font-size:1rem;display:inline-flex;align-items:center;gap:.5rem;transition:all var(--transition);text-decoration:none}
+    .download-btn:hover{background:#00ff87;transform:translateY(-2px)}
+    .order-id{font-family:var(--font-mono);font-size:.85rem;color:var(--accent);background:rgba(0,210,255,0.1);border:1px solid rgba(0,210,255,0.2);border-radius:8px;padding:.5rem 1rem;display:inline-block;margin:.75rem 0}
+    .alert{padding:1rem 1.25rem;border-radius:var(--radius);margin-bottom:1rem;font-size:.88rem;border:1px solid}
+    .alert-error{background:rgba(255,87,87,0.1);border-color:rgba(255,87,87,0.3);color:#ff5757}
+    .alert-success{background:rgba(0,230,118,0.1);border-color:rgba(0,230,118,0.3);color:var(--green)}
+    #toast{position:fixed;bottom:2rem;right:1rem;z-index:9999;padding:.9rem 1.4rem;border-radius:12px;font-family:var(--font-display);font-size:.9rem;font-weight:600;transition:all .3s ease;opacity:0;transform:translateY(10px);max-width:340px;pointer-events:none}
+    @media(max-width:900px){.checkout-grid{grid-template-columns:1fr}}
+    @media(max-width:640px){.payment-methods-grid{grid-template-columns:1fr 1fr}}
+  </style>
+</head>
+<body>
+
+<div class="hero-bg"><div class="grid-overlay"></div><div class="glow glow-1"></div></div>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="logo"><span class="logo-icon">⚡</span><span class="logo-text">Techify</span></a>
+    <a href="products.html" style="color:var(--text-muted);font-size:.85rem;">← Back to Products</a>
+  </div>
+</nav>
+
+<div id="toast"></div>
+
+<div class="checkout-wrap">
+  <div class="container">
+    <div id="checkoutMain">
+      <h1 class="checkout-title">Checkout</h1>
+      <p class="checkout-sub">Complete your purchase below</p>
+      <div class="checkout-grid">
+        <!-- LEFT: FORM -->
+        <div>
+          <div class="card" style="margin-bottom:1.5rem">
+            <div class="card-title"><span class="step-dot">1</span> Your Details</div>
+            <div class="form-group">
+              <label class="form-label">Full Name *</label>
+              <input type="text" id="name" class="form-input" placeholder="e.g. Aminata Bangura">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email Address *</label>
+              <input type="email" id="email" class="form-input" placeholder="your@email.com">
+              <p style="font-size:.78rem;color:var(--text-dim);margin-top:.4rem">Download link will be sent here</p>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone Number *</label>
+              <input type="tel" id="phone" class="form-input" placeholder="+232 76 XXX XXX">
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title"><span class="step-dot">2</span> Payment Method</div>
+            <div class="payment-methods-grid">
+              <div class="pay-option" onclick="selectPayment('orange',this)">
+                <div class="pay-option-icon">🟠</div>
+                <div class="pay-option-name">Orange Money</div>
+              </div>
+              <div class="pay-option" onclick="selectPayment('afri',this)">
+                <div class="pay-option-icon">💚</div>
+                <div class="pay-option-name">Afrimoney</div>
+              </div>
+              <div class="pay-option" onclick="selectPayment('whatsapp',this)">
+                <div class="pay-option-icon">📲</div>
+                <div class="pay-option-name">WhatsApp</div>
+              </div>
+              <div class="pay-option" onclick="selectPayment('other',this)">
+                <div class="pay-option-icon">💳</div>
+                <div class="pay-option-name">Other</div>
+              </div>
+            </div>
+
+            <!-- Instructions boxes -->
+            <div class="instructions-box instructions-orange" id="instr-orange">
+              <h4>🟠 How to Pay with Orange Money</h4>
+              <p><strong>Step 1:</strong> Dial <span class="code">*144#</span> on your Orange SIM</p>
+              <p><strong>Step 2:</strong> Select option <strong>1 (Transfer)</strong></p>
+              <p><strong>Step 3:</strong> Enter our number: <span class="code">+232 76 000 000</span></p>
+              <p><strong>Step 4:</strong> Enter amount: <span class="code" id="orange-amount"></span></p>
+              <p><strong>Step 5:</strong> Use your Order ID as reference</p>
+              <p style="margin-top:.75rem;font-size:.82rem;color:var(--text-dim)">✅ After payment, click "I've Paid" below</p>
+            </div>
+            <div class="instructions-box instructions-green" id="instr-afri">
+              <h4>💚 How to Pay with Afrimoney</h4>
+              <p><strong>Option A:</strong> Open the Afrimoney app → Send Money</p>
+              <p><strong>Option B:</strong> Dial <span class="code">*501#</span></p>
+              <p><strong>Send to:</strong> <span class="code">+232 88 000 000</span></p>
+              <p><strong>Amount:</strong> <span class="code" id="afri-amount"></span></p>
+              <p><strong>Reference:</strong> Your Order ID</p>
+              <p style="margin-top:.75rem;font-size:.82rem;color:var(--text-dim)">✅ After payment, click "I've Paid" below</p>
+            </div>
+            <div class="instructions-box instructions-blue" id="instr-whatsapp">
+              <h4>📲 Pay via WhatsApp</h4>
+              <p>We'll arrange payment manually via WhatsApp. You can send mobile money from any provider.</p>
+              <p>Click the button below to open WhatsApp and we'll guide you through payment.</p>
+            </div>
+            <div class="instructions-box instructions-blue" id="instr-other">
+              <h4>💳 Other Payment</h4>
+              <p>Contact us via WhatsApp or email and we'll find a payment method that works for you.</p>
+              <p>📧 info@techify.sl &nbsp;|&nbsp; 📱 +232 76 000 000</p>
+            </div>
+
+            <div id="payBtnArea" style="display:none;margin-top:1rem">
+              <button class="btn btn-orange" id="payBtn" onclick="processPayment()">
+                ✅ I've Made the Payment
+              </button>
+            </div>
+            <div id="whatsappBtnArea" style="display:none;margin-top:1rem">
+              <a id="whatsappLink" href="#" target="_blank" class="btn btn-primary" style="background:#25D366;color:#fff;border-color:#25D366">
+                💬 Open WhatsApp to Pay
+              </a>
+            </div>
+
+            <div id="errorMsg" class="alert alert-error" style="display:none;margin-top:1rem"></div>
+          </div>
+        </div>
+
+        <!-- RIGHT: SUMMARY -->
+        <div>
+          <div class="card" style="position:sticky;top:80px">
+            <div class="card-title">Order Summary</div>
+            <div class="summary-product">
+              <div class="summary-img" id="summaryEmoji"></div>
+              <div>
+                <div class="summary-name" id="summaryName">Loading...</div>
+                <div style="font-size:.8rem;color:var(--text-muted)" id="summaryType"></div>
+                <div class="summary-price" id="summaryPrice"></div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Discount Code</label>
+              <div class="discount-row">
+                <input type="text" id="discountCode" class="form-input" placeholder="WELCOME10" style="border-radius:var(--radius) 0 0 var(--radius)">
+                <button class="discount-btn" onclick="applyDiscount()">Apply</button>
+              </div>
+              <div id="discountMsg" style="font-size:.8rem;margin-top:.4rem"></div>
+            </div>
+            <hr class="section-divider">
+            <div class="summary-row"><span>Subtotal</span><span id="subtotalVal"></span></div>
+            <div class="summary-row" id="discountRow" style="display:none"><span style="color:var(--green)">Discount</span><span style="color:var(--green)" id="discountVal"></span></div>
+            <div class="summary-total-row">
+              <span class="total-label">Total</span>
+              <span class="total-amount" id="totalVal"></span>
+            </div>
+            <div style="margin-top:1.5rem;font-size:.78rem;color:var(--text-dim);text-align:center;line-height:1.6">
+              🔒 Secure checkout &nbsp;|&nbsp; ⚡ Instant delivery<br>3 download attempts · 48h expiry
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUCCESS STATE -->
+    <div id="successState" style="display:none;max-width:600px;margin:0 auto">
+      <div class="card">
+        <div class="success-state">
+          <div class="success-icon">🎉</div>
+          <h2>Payment Received!</h2>
+          <p>Your payment is being verified. Download link will appear shortly.</p>
+          <div class="order-id" id="successOrderId"></div>
+          <div id="verifyingMsg" style="color:var(--text-muted);font-size:.9rem;margin:1rem 0">
+            <span class="spinner" style="border-color:rgba(0,210,255,0.3);border-top-color:var(--accent)"></span>Verifying payment...
+          </div>
+          <div id="downloadArea" style="display:none">
+            <div class="alert alert-success">✅ Payment confirmed! Your download is ready.</div>
+            <a href="download.html" id="downloadLink" class="download-btn">⬇️ Download Your Product</a>
+            <p style="margin-top:1rem;font-size:.82rem;color:var(--text-muted)">Link also sent to your email. Valid for 48 hours.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const PRODUCTS = [
+  {id:"prod_001",title:"Winning Business Plan Template",price:45,currency:"NLe",category:"templates",emoji:"📋",fileType:"DOCX + PDF",fileSize:"2.3 MB"},
+  {id:"prod_002",title:"CV & Resume Bundle (5 Templates)",price:30,currency:"NLe",category:"templates",emoji:"📄",fileType:"DOCX + PDF",fileSize:"4.1 MB"},
+  {id:"prod_003",title:"Digital Marketing for African Businesses",price:60,currency:"NLe",category:"ebooks",emoji:"📘",fileType:"PDF",fileSize:"8.7 MB"},
+  {id:"prod_004",title:"Excel & Spreadsheet Mastery Course",price:80,currency:"NLe",category:"courses",emoji:"📊",fileType:"PDF + XLSX",fileSize:"45 MB"},
+  {id:"prod_005",title:"Social Media Content Calendar 2024",price:35,currency:"NLe",category:"templates",emoji:"📅",fileType:"Excel + PDF",fileSize:"3.2 MB"},
+  {id:"prod_006",title:"Start & Register a Business in SL",price:40,currency:"NLe",category:"ebooks",emoji:"📑",fileType:"PDF",fileSize:"5.5 MB"},
+  {id:"prod_007",title:"Invoice & Receipts Template Pack",price:25,currency:"NLe",category:"templates",emoji:"🧾",fileType:"DOCX + XLSX",fileSize:"1.8 MB"},
+  {id:"prod_008",title:"Python Programming for Beginners",price:55,currency:"NLe",category:"courses",emoji:"🐍",fileType:"PDF + Code Files",fileSize:"12 MB"}
+];
+
+const DISCOUNT_CODES = {
+  'WELCOME10':{type:'percent',value:10,label:'10% off'},
+  'TECHIFY20':{type:'percent',value:20,label:'20% off'},
+  'STUDENT50':{type:'percent',value:50,label:'50% off'},
+  'FREETOWN':{type:'fixed',value:10,label:'NLe 10 off'}
+};
+
+// Get product from URL
+const params = new URLSearchParams(window.location.search);
+const productId = params.get('id') || 'prod_001';
+const product = PRODUCTS.find(p=>p.id===productId) || PRODUCTS[0];
+
+let finalPrice = product.price;
+let appliedDiscount = null;
+let selectedPayment = null;
+
+// Fill summary
+document.getElementById('summaryEmoji').textContent = product.emoji;
+document.getElementById('summaryName').textContent = product.title;
+document.getElementById('summaryType').textContent = product.fileType + ' · ' + product.fileSize;
+updatePricing();
+
+function updatePricing(){
+  document.getElementById('subtotalVal').textContent = `${product.currency} ${product.price}`;
+  if(appliedDiscount){
+    const disc = appliedDiscount.type==='percent' ? Math.round(product.price*appliedDiscount.value/100) : appliedDiscount.value;
+    finalPrice = Math.max(0, product.price - disc);
+    document.getElementById('discountRow').style.display='flex';
+    document.getElementById('discountVal').textContent = `-${product.currency} ${disc}`;
+  } else {
+    finalPrice = product.price;
+    document.getElementById('discountRow').style.display='none';
+  }
+  document.getElementById('summaryPrice').textContent = `${product.currency} ${finalPrice}`;
+  document.getElementById('totalVal').textContent = `${product.currency} ${finalPrice}`;
+  document.getElementById('orange-amount').textContent = `NLe ${finalPrice}`;
+  document.getElementById('afri-amount').textContent = `NLe ${finalPrice}`;
+}
+
+function applyDiscount(){
+  const code = document.getElementById('discountCode').value.trim().toUpperCase();
+  const msg = document.getElementById('discountMsg');
+  if(!code){msg.textContent='';return}
+  if(DISCOUNT_CODES[code]){
+    appliedDiscount = DISCOUNT_CODES[code];
+    msg.style.color='var(--green)';
+    msg.textContent = '✅ ' + appliedDiscount.label + ' applied!';
+    updatePricing();
+    showToast('Discount applied! ' + appliedDiscount.label, 'success');
+  } else {
+    msg.style.color='#ff5757';
+    msg.textContent = '❌ Invalid discount code';
+  }
+}
+
+function selectPayment(type, el){
+  selectedPayment = type;
+  document.querySelectorAll('.pay-option').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+  document.querySelectorAll('.instructions-box').forEach(b=>b.classList.remove('show'));
+  document.getElementById('payBtnArea').style.display='none';
+  document.getElementById('whatsappBtnArea').style.display='none';
+  
+  if(type==='orange'){
+    document.getElementById('instr-orange').classList.add('show');
+    document.getElementById('payBtnArea').style.display='block';
+    document.getElementById('payBtn').style.background='var(--orange)';
+  } else if(type==='afri'){
+    document.getElementById('instr-afri').classList.add('show');
+    document.getElementById('payBtnArea').style.display='block';
+    document.getElementById('payBtn').style.background='var(--green)';
+    document.getElementById('payBtn').style.color='#000';
+  } else if(type==='whatsapp'){
+    document.getElementById('instr-whatsapp').classList.add('show');
+    document.getElementById('whatsappBtnArea').style.display='block';
+    const name = document.getElementById('name').value || 'Customer';
+    const msg = encodeURIComponent(`Hi! I want to buy: ${product.title}\nAmount: NLe ${finalPrice}\nName: ${name}`);
+    document.getElementById('whatsappLink').href = `https://wa.me/23276000000?text=${msg}`;
+  } else {
+    document.getElementById('instr-other').classList.add('show');
+  }
+}
+
+function generateOrderId(){
+  const ts = Date.now().toString(36).toUpperCase();
+  const rand = Math.random().toString(36).substring(2,6).toUpperCase();
+  return `TCH-${ts}-${rand}`;
+}
+
+function generateToken(){
+  const arr = new Uint8Array(24);
+  crypto.getRandomValues(arr);
+  return Array.from(arr,b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+function processPayment(){
+  const name = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const errEl = document.getElementById('errorMsg');
+  
+  if(!name){errEl.textContent='Please enter your full name';errEl.style.display='block';return}
+  if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){errEl.textContent='Please enter a valid email';errEl.style.display='block';return}
+  if(!phone){errEl.textContent='Please enter your phone number';errEl.style.display='block';return}
+  errEl.style.display='none';
+  
+  const orderId = generateOrderId();
+  const token = generateToken();
+  
+  // Save order
+  const order = {id:orderId,token,productId:product.id,productTitle:product.title,price:finalPrice,currency:'NLe',name,email,phone,paymentMethod:selectedPayment,status:'pending',createdAt:new Date().toISOString()};
+  const orders = JSON.parse(localStorage.getItem('techify_orders')||'[]');
+  orders.push(order);
+  localStorage.setItem('techify_orders',JSON.stringify(orders));
+  
+  // Show success state
+  document.getElementById('checkoutMain').style.display='none';
+  document.getElementById('successState').style.display='block';
+  document.getElementById('successOrderId').textContent = '🔖 Order ID: ' + orderId;
+  
+  // Simulate verification after 8 seconds
+  setTimeout(()=>{
+    document.getElementById('verifyingMsg').style.display='none';
+    // Update order status
+    const orders2 = JSON.parse(localStorage.getItem('techify_orders')||'[]');
+    const idx = orders2.findIndex(o=>o.id===orderId);
+    if(idx!==-1){orders2[idx].status='confirmed';localStorage.setItem('techify_orders',JSON.stringify(orders2))}
+    document.getElementById('downloadLink').href = `download.html?token=${token}&order=${orderId}`;
+    document.getElementById('downloadArea').style.display='block';
+    showToast('🎉 Payment confirmed! Download ready.','success');
+  }, 8000);
+}
+
+function showToast(msg,type='info'){
+  const t=document.getElementById('toast');
+  const colors={success:'rgba(0,230,118,0.15)',error:'rgba(255,87,87,0.15)',info:'rgba(0,210,255,0.15)'};
+  const textColors={success:'#00e676',error:'#ff5757',info:'#00d2ff'};
+  t.textContent=msg;t.style.background=colors[type];t.style.border=`1px solid ${textColors[type]}`;t.style.color=textColors[type];
+  t.style.opacity='1';t.style.transform='translateY(0)';
+  setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(10px)'},4000);
+}
+</script>
+</body>
+</html>

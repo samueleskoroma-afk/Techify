@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — Techify</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap');
+    :root{--bg:#080c10;--bg-card:#0f1620;--bg-card2:#141c28;--border:rgba(255,255,255,0.08);--border-glow:rgba(0,210,255,0.3);--accent:#00d2ff;--orange:#ff8c00;--green:#00e676;--text:#e8edf5;--text-muted:#7a8aa0;--text-dim:#4a5568;--font-display:'Syne',system-ui,sans-serif;--font-mono:'Space Mono',monospace;--radius:12px}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--font-display);background:var(--bg);color:var(--text);min-height:100vh;display:flex}
+    a{color:inherit;text-decoration:none}
+    button{cursor:pointer;border:none;background:none;font-family:inherit}
+    ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--accent);border-radius:3px}
+    /* SIDEBAR */
+    .sidebar{width:240px;background:var(--bg-card);border-right:1px solid var(--border);padding:1.5rem;flex-shrink:0;display:flex;flex-direction:column;min-height:100vh}
+    .sidebar-logo{display:flex;align-items:center;gap:.5rem;font-weight:800;font-size:1.2rem;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}
+    .sidebar-logo-icon{font-size:1.4rem;filter:drop-shadow(0 0 8px var(--accent))}
+    .sidebar-badge{background:rgba(0,210,255,0.1);color:var(--accent);font-size:.65rem;padding:.15rem .5rem;border-radius:50px;font-weight:700}
+    .nav-item{display:flex;align-items:center;gap:.75rem;padding:.7rem .9rem;border-radius:var(--radius);color:var(--text-muted);font-size:.88rem;font-weight:600;margin-bottom:.2rem;cursor:pointer;transition:all .2s}
+    .nav-item:hover,.nav-item.active{background:rgba(0,210,255,0.1);color:var(--accent)}
+    .nav-item span:first-child{font-size:1rem}
+    .sidebar-footer{margin-top:auto;padding-top:1.5rem;border-top:1px solid var(--border)}
+    .sidebar-footer a{display:flex;align-items:center;gap:.5rem;color:var(--text-dim);font-size:.82rem;padding:.5rem;transition:color .2s}
+    .sidebar-footer a:hover{color:var(--text)}
+    /* MAIN */
+    .main{flex:1;padding:2rem;overflow:auto;min-width:0}
+    .top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem}
+    .top-bar h1{font-size:1.5rem;font-weight:800}
+    .top-bar-right{display:flex;align-items:center;gap:.75rem}
+    .avatar{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),#0066ff);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:#000}
+    /* STAT CARDS */
+    .stat-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.25rem;margin-bottom:2rem}
+    .stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;transition:.2s}
+    .stat-card:hover{border-color:var(--border-glow)}
+    .stat-label{font-size:.78rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.6rem}
+    .stat-value{font-size:2rem;font-weight:800;font-family:var(--font-mono);color:var(--accent)}
+    .stat-sub{font-size:.78rem;color:var(--text-dim);margin-top:.25rem}
+    /* SECTIONS */
+    .section{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:1.5rem;overflow:hidden}
+    .section-head{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border)}
+    .section-head h2{font-size:1rem;font-weight:700}
+    /* TABLE */
+    .table-wrap{overflow-x:auto}
+    table{width:100%;border-collapse:collapse}
+    th{background:rgba(255,255,255,0.03);padding:.8rem 1rem;text-align:left;font-size:.76rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);border-bottom:1px solid var(--border);white-space:nowrap}
+    td{padding:.8rem 1rem;font-size:.88rem;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:rgba(255,255,255,0.02)}
+    .status{padding:.2rem .6rem;border-radius:50px;font-size:.7rem;font-weight:700;text-transform:uppercase;white-space:nowrap}
+    .status-pending{background:rgba(255,193,7,0.15);color:#ffc107}
+    .status-confirmed{background:rgba(0,230,118,0.15);color:var(--green)}
+    .status-delivered{background:rgba(0,210,255,0.15);color:var(--accent)}
+    .btn-sm{padding:.35rem .85rem;border-radius:50px;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .2s;border:1px solid}
+    .btn-confirm{background:rgba(0,230,118,0.1);color:var(--green);border-color:rgba(0,230,118,0.3)}
+    .btn-confirm:hover{background:rgba(0,230,118,0.2)}
+    .btn-resend{background:rgba(0,210,255,0.1);color:var(--accent);border-color:rgba(0,210,255,0.25)}
+    .btn-resend:hover{background:rgba(0,210,255,0.2)}
+    .btn-export{background:var(--accent);color:#000;border:none;border-radius:50px;padding:.5rem 1.25rem;font-weight:700;font-size:.82rem;cursor:pointer;transition:.2s}
+    .btn-export:hover{background:#00e5ff}
+    /* TABS */
+    .tabs{display:flex;gap:.25rem;padding:1rem 1.5rem;border-bottom:1px solid var(--border)}
+    .tab{padding:.5rem 1.1rem;border-radius:50px;font-size:.85rem;font-weight:600;cursor:pointer;color:var(--text-muted);transition:.2s;border:1px solid transparent}
+    .tab:hover,.tab.active{background:rgba(0,210,255,0.1);color:var(--accent);border-color:rgba(0,210,255,0.2)}
+    /* EMPTY */
+    .empty{text-align:center;padding:3rem;color:var(--text-muted);font-size:.9rem}
+    #toast{position:fixed;bottom:2rem;right:1rem;z-index:9999;padding:.9rem 1.4rem;border-radius:12px;font-family:var(--font-display);font-size:.9rem;font-weight:600;transition:all .3s;opacity:0;transform:translateY(10px);pointer-events:none}
+    .view-all-link{color:var(--accent);font-size:.82rem;font-weight:600;text-decoration:none;transition:.2s}
+    .view-all-link:hover{opacity:.8}
+    @media(max-width:768px){.sidebar{display:none}.stat-value{font-size:1.5rem}}
+  </style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <span class="sidebar-logo-icon">⚡</span>
+    <span>Techify</span>
+    <span class="sidebar-badge">Admin</span>
+  </div>
+  <nav>
+    <div class="nav-item active" onclick="showSection('orders')"><span>📦</span><span>Orders</span></div>
+    <div class="nav-item" onclick="showSection('products')"><span>🗂️</span><span>Products</span></div>
+    <div class="nav-item" onclick="showSection('customers')"><span>👥</span><span>Customers</span></div>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="../index.html">🌐 View Store</a>
+    <a href="login.html" onclick="logout()">🚪 Logout</a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="top-bar">
+    <h1 id="sectionTitle">Orders</h1>
+    <div class="top-bar-right">
+      <span style="font-size:.82rem;color:var(--text-muted)" id="lastUpdated"></span>
+      <div class="avatar">AD</div>
+    </div>
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="stat-cards">
+    <div class="stat-card"><div class="stat-label">Total Revenue</div><div class="stat-value" id="statRevenue">NLe 0</div><div class="stat-sub">All time</div></div>
+    <div class="stat-card"><div class="stat-label">Total Orders</div><div class="stat-value" id="statOrders">0</div><div class="stat-sub">All time</div></div>
+    <div class="stat-card"><div class="stat-label">Pending</div><div class="stat-value" id="statPending" style="color:#ffc107">0</div><div class="stat-sub">Need confirmation</div></div>
+    <div class="stat-card"><div class="stat-label">Confirmed</div><div class="stat-value" id="statConfirmed" style="color:var(--green)">0</div><div class="stat-sub">Delivered</div></div>
+  </div>
+
+  <!-- ORDERS SECTION -->
+  <div class="section" id="sec-orders">
+    <div class="section-head">
+      <h2>Recent Orders</h2>
+      <button class="btn-export" onclick="exportCSV()">⬇️ Export CSV</button>
+    </div>
+    <div class="tabs">
+      <div class="tab active" onclick="filterOrders('all',this)">All</div>
+      <div class="tab" onclick="filterOrders('pending',this)">Pending</div>
+      <div class="tab" onclick="filterOrders('confirmed',this)">Confirmed</div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Order ID</th><th>Customer</th><th>Product</th><th>Amount</th><th>Method</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+        <tbody id="ordersTable"></tbody>
+      </table>
+      <div class="empty" id="ordersEmpty" style="display:none">No orders yet. Orders will appear here once customers complete checkout.</div>
+    </div>
+  </div>
+
+  <!-- PRODUCTS SECTION -->
+  <div class="section" id="sec-products" style="display:none">
+    <div class="section-head"><h2>Product Performance</h2></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Sales</th><th>Revenue</th></tr></thead>
+        <tbody id="productsTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CUSTOMERS SECTION -->
+  <div class="section" id="sec-customers" style="display:none">
+    <div class="section-head"><h2>Customers</h2></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Orders</th><th>Total Spent</th></tr></thead>
+        <tbody id="customersTable"></tbody>
+      </table>
+      <div class="empty" id="customersEmpty" style="display:none">No customers yet.</div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// Auth check
+if(!sessionStorage.getItem('techify_admin')){window.location.href='login.html'}
+
+const PRODUCTS = [
+  {id:"prod_001",title:"Winning Business Plan Template",category:"templates",price:45,emoji:"📋"},
+  {id:"prod_002",title:"CV & Resume Bundle",category:"templates",price:30,emoji:"📄"},
+  {id:"prod_003",title:"Digital Marketing Guide",category:"ebooks",price:60,emoji:"📘"},
+  {id:"prod_004",title:"Excel Mastery Course",category:"courses",price:80,emoji:"📊"},
+  {id:"prod_005",title:"Social Media Calendar",category:"templates",price:35,emoji:"📅"},
+  {id:"prod_006",title:"Business Registration Guide",category:"ebooks",price:40,emoji:"📑"},
+  {id:"prod_007",title:"Invoice Templates Pack",category:"templates",price:25,emoji:"🧾"},
+  {id:"prod_008",title:"Python for Beginners",category:"courses",price:55,emoji:"🐍"}
+];
+
+let currentOrderFilter = 'all';
+let currentSection = 'orders';
+
+function getOrders(){return JSON.parse(localStorage.getItem('techify_orders')||'[]')}
+
+function updateStats(){
+  const orders = getOrders();
+  const rev = orders.filter(o=>o.status==='confirmed').reduce((s,o)=>s+(o.price||0),0);
+  const pending = orders.filter(o=>o.status==='pending').length;
+  const confirmed = orders.filter(o=>o.status==='confirmed').length;
+  document.getElementById('statRevenue').textContent = 'NLe '+rev;
+  document.getElementById('statOrders').textContent = orders.length;
+  document.getElementById('statPending').textContent = pending;
+  document.getElementById('statConfirmed').textContent = confirmed;
+  document.getElementById('lastUpdated').textContent = 'Updated '+new Date().toLocaleTimeString();
+}
+
+function renderOrders(filter='all'){
+  let orders = getOrders();
+  if(filter!=='all') orders = orders.filter(o=>o.status===filter);
+  const tbody = document.getElementById('ordersTable');
+  const empty = document.getElementById('ordersEmpty');
+  if(orders.length===0){tbody.innerHTML='';empty.style.display='block';return}
+  empty.style.display='none';
+  tbody.innerHTML = orders.reverse().map(o=>{
+    const prod = PRODUCTS.find(p=>p.id===o.productId);
+    const date = new Date(o.createdAt).toLocaleDateString('en-GB');
+    const statusClass = o.status==='confirmed'?'status-confirmed':'status-pending';
+    return `<tr>
+      <td><code style="font-family:var(--font-mono);font-size:.75rem;color:var(--accent)">${o.id}</code></td>
+      <td><div style="font-weight:600">${o.name||'—'}</div><div style="font-size:.75rem;color:var(--text-muted)">${o.email||''}</div></td>
+      <td>${prod?prod.emoji+' ':''}<span style="font-size:.85rem">${o.productTitle||'Unknown'}</span></td>
+      <td style="font-family:var(--font-mono);color:var(--accent)">NLe ${o.price||0}</td>
+      <td style="font-size:.82rem;text-transform:capitalize">${o.paymentMethod||'—'}</td>
+      <td><span class="status ${statusClass}">${o.status}</span></td>
+      <td style="font-size:.8rem;color:var(--text-muted)">${date}</td>
+      <td style="display:flex;gap:.4rem;flex-wrap:wrap">
+        ${o.status==='pending'?`<button class="btn-sm btn-confirm" onclick="confirmOrder('${o.id}')">Confirm</button>`:''}
+        ${o.token?`<button class="btn-sm btn-resend" onclick="copyLink('${o.id}','${o.token}')">Copy Link</button>`:''}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderProducts(){
+  const orders = getOrders().filter(o=>o.status==='confirmed');
+  document.getElementById('productsTable').innerHTML = PRODUCTS.map(p=>{
+    const sales = orders.filter(o=>o.productId===p.id).length;
+    const rev = sales * p.price;
+    return `<tr>
+      <td><span style="margin-right:.5rem">${p.emoji}</span>${p.title}</td>
+      <td><span class="status" style="background:rgba(0,210,255,0.1);color:var(--accent)">${p.category}</span></td>
+      <td style="font-family:var(--font-mono);color:var(--accent)">NLe ${p.price}</td>
+      <td>${sales}</td>
+      <td style="font-family:var(--font-mono);color:var(--green)">NLe ${rev}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderCustomers(){
+  const orders = getOrders();
+  const customerMap = {};
+  orders.forEach(o=>{
+    if(!o.email)return;
+    if(!customerMap[o.email]){customerMap[o.email]={name:o.name,email:o.email,phone:o.phone,orders:0,spent:0}}
+    customerMap[o.email].orders++;
+    if(o.status==='confirmed') customerMap[o.email].spent+=o.price||0;
+  });
+  const customers = Object.values(customerMap);
+  const tbody = document.getElementById('customersTable');
+  const empty = document.getElementById('customersEmpty');
+  if(customers.length===0){tbody.innerHTML='';empty.style.display='block';return}
+  empty.style.display='none';
+  tbody.innerHTML = customers.map(c=>`<tr>
+    <td style="font-weight:600">${c.name||'—'}</td>
+    <td>${c.email}</td>
+    <td style="font-size:.85rem">${c.phone||'—'}</td>
+    <td>${c.orders}</td>
+    <td style="font-family:var(--font-mono);color:var(--accent)">NLe ${c.spent}</td>
+  </tr>`).join('');
+}
+
+function confirmOrder(id){
+  const orders = getOrders();
+  const idx = orders.findIndex(o=>o.id===id);
+  if(idx!==-1){
+    orders[idx].status='confirmed';
+    if(!orders[idx].token){
+      const arr = new Uint8Array(24);
+      crypto.getRandomValues(arr);
+      orders[idx].token = Array.from(arr,b=>b.toString(16).padStart(2,'0')).join('');
+    }
+    localStorage.setItem('techify_orders',JSON.stringify(orders));
+    refresh();
+    showToast('✅ Order confirmed! Customer can now download.','success');
+  }
+}
+
+function copyLink(orderId, token){
+  const link = window.location.origin+'/download.html?token='+token+'&order='+orderId;
+  navigator.clipboard.writeText(link).then(()=>{
+    showToast('📋 Download link copied to clipboard!','info');
+  }).catch(()=>{
+    prompt('Copy this download link:',link);
+  });
+}
+
+function filterOrders(filter, btn){
+  currentOrderFilter = filter;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderOrders(filter);
+}
+
+function showSection(sec){
+  currentSection = sec;
+  document.querySelectorAll('.section').forEach(s=>s.style.display='none');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('sec-'+sec).style.display='block';
+  document.getElementById('sectionTitle').textContent = sec.charAt(0).toUpperCase()+sec.slice(1);
+  event.currentTarget.classList.add('active');
+  if(sec==='products') renderProducts();
+  if(sec==='customers') renderCustomers();
+}
+
+function exportCSV(){
+  const orders = getOrders();
+  if(orders.length===0){showToast('No orders to export','error');return}
+  const headers = ['Order ID','Name','Email','Phone','Product','Amount','Payment','Status','Date'];
+  const rows = orders.map(o=>[o.id,o.name,o.email,o.phone,o.productTitle,o.price,o.paymentMethod,o.status,o.createdAt].map(v=>`"${v||''}"`).join(','));
+  const csv = [headers.join(','),...rows].join('\n');
+  const blob = new Blob([csv],{type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'techify-orders-'+new Date().toISOString().split('T')[0]+'.csv';
+  a.click();
+  showToast('📊 CSV exported!','success');
+}
+
+function logout(){sessionStorage.removeItem('techify_admin')}
+
+function showToast(msg,type='info'){
+  const t=document.getElementById('toast');
+  const colors={success:'rgba(0,230,118,0.15)',error:'rgba(255,87,87,0.15)',info:'rgba(0,210,255,0.15)'};
+  const textColors={success:'#00e676',error:'#ff5757',info:'#00d2ff'};
+  t.textContent=msg;t.style.background=colors[type];t.style.border=`1px solid ${textColors[type]}`;t.style.color=textColors[type];
+  t.style.opacity='1';t.style.transform='translateY(0)';
+  setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(10px)'},4000);
+}
+
+function refresh(){updateStats();renderOrders(currentOrderFilter)}
+
+// Add some demo orders if empty
+function seedDemoData(){
+  const orders = getOrders();
+  if(orders.length>0) return; // Don't overwrite
+  const demo = [
+    {id:'TCH-DEMO01-TEST',token:'abc123def456',productId:'prod_001',productTitle:'Winning Business Plan Template',price:45,currency:'NLe',name:'Aminata Bangura',email:'aminata@gmail.com',phone:'+232 76 123 456',paymentMethod:'orange',status:'confirmed',createdAt:new Date(Date.now()-3600000).toISOString(),downloadCount:1},
+    {id:'TCH-DEMO02-TEST',token:'xyz789uvw012',productId:'prod_002',productTitle:'CV & Resume Bundle',price:30,currency:'NLe',name:'Mohamed Kamara',email:'mohamed@gmail.com',phone:'+232 88 234 567',paymentMethod:'afri',status:'pending',createdAt:new Date(Date.now()-1800000).toISOString(),downloadCount:0},
+    {id:'TCH-DEMO03-TEST',token:'mno345pqr678',productId:'prod_003',productTitle:'Digital Marketing Guide',price:60,currency:'NLe',name:'Fatmata Koroma',email:'fatmata@gmail.com',phone:'+232 76 345 678',paymentMethod:'orange',status:'confirmed',createdAt:new Date(Date.now()-86400000).toISOString(),downloadCount:2}
+  ];
+  localStorage.setItem('techify_orders',JSON.stringify(demo));
+}
+
+seedDemoData();
+refresh();
+setInterval(refresh, 30000);
+</script>
+</body>
+</html>
